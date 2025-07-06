@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import SafeIcon from '../common/SafeIcon';
+import ExportOptions from './ExportOptions';
 import * as FiIcons from 'react-icons/fi';
 
 const { FiTrendingUp, FiTrendingDown, FiCheckCircle, FiAlertTriangle, FiDollarSign, FiBarChart3, FiPieChart, FiInfo } = FiIcons;
@@ -40,6 +41,9 @@ const Results = ({ results }) => {
 
   return (
     <div className="space-y-6">
+      {/* Export Options */}
+      <ExportOptions results={results} />
+
       {/* Inflation Notice */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}

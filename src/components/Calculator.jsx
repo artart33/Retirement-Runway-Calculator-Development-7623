@@ -7,13 +7,13 @@ const { FiPlus, FiTrash2, FiCalculator, FiRefreshCw, FiDollarSign, FiTrendingUp 
 
 const Calculator = ({ onCalculate, onReset }) => {
   const [formData, setFormData] = useState({
-    currentAge: 45,
+    currentAge: 52,
     currentYear: 2025,
     lumpSumSavings: 500000,
     desiredMonthlyIncome: 3500,
-    inflationRate: 3.0,
+    inflationRate: 2.0,
     investmentGrowthRate: 5.0,
-    lifeExpectancy: 90
+    lifeExpectancy: 85
   });
 
   const [incomeStreams, setIncomeStreams] = useState([
@@ -171,6 +171,9 @@ const Calculator = ({ onCalculate, onReset }) => {
       yearlyData,
       lifeExpectancy: data.lifeExpectancy,
       finalSavings: currentSavings,
+      formData: data,
+      incomeStreams: streams,
+      oneTimePayments: payments,
       summary: {
         initialSavings: data.lumpSumSavings,
         totalIncomeReceived,
@@ -188,13 +191,13 @@ const Calculator = ({ onCalculate, onReset }) => {
 
   const resetForm = () => {
     setFormData({
-      currentAge: 45,
+      currentAge: 52,
       currentYear: 2025,
       lumpSumSavings: 500000,
       desiredMonthlyIncome: 3500,
-      inflationRate: 3.0,
+      inflationRate: 2.0,
       investmentGrowthRate: 5.0,
-      lifeExpectancy: 90
+      lifeExpectancy: 85
     });
     setIncomeStreams([
       {
@@ -230,7 +233,7 @@ const Calculator = ({ onCalculate, onReset }) => {
               value={formData.currentAge}
               onChange={(e) => handleInputChange('currentAge', parseInt(e.target.value))}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="e.g., 45"
+              placeholder="e.g., 52"
             />
           </div>
           
@@ -295,7 +298,7 @@ const Calculator = ({ onCalculate, onReset }) => {
                 value={formData.inflationRate}
                 onChange={(e) => handleInputChange('inflationRate', parseFloat(e.target.value))}
                 className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="e.g., 3.0"
+                placeholder="e.g., 2.0"
               />
               <span className="absolute right-3 top-2 text-gray-500">%</span>
             </div>
@@ -331,7 +334,7 @@ const Calculator = ({ onCalculate, onReset }) => {
             value={formData.lifeExpectancy}
             onChange={(e) => handleInputChange('lifeExpectancy', parseInt(e.target.value))}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="e.g., 90"
+            placeholder="e.g., 85"
           />
         </div>
 
