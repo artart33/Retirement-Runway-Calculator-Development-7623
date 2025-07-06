@@ -17,38 +17,20 @@ const Calculator = ({ onCalculate, onReset }) => {
   });
 
   const [incomeStreams, setIncomeStreams] = useState([
-    {
-      id: 1,
-      name: 'State Pension',
-      startAge: 67,
-      monthlyAmount: 1200
-    }
+    { id: 1, name: 'Staatspensioen', startAge: 67, monthlyAmount: 1200 }
   ]);
 
   const [oneTimePayments, setOneTimePayments] = useState([
-    {
-      id: 1,
-      name: 'House Sale',
-      age: 70,
-      amount: 200000
-    }
+    { id: 1, name: 'Huis Verkoop', age: 70, amount: 200000 }
   ]);
 
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const addIncomeStream = () => {
     const newId = Math.max(...incomeStreams.map(s => s.id), 0) + 1;
-    setIncomeStreams(prev => [...prev, {
-      id: newId,
-      name: '',
-      startAge: 67,
-      monthlyAmount: 0
-    }]);
+    setIncomeStreams(prev => [...prev, { id: newId, name: '', startAge: 67, monthlyAmount: 0 }]);
   };
 
   const removeIncomeStream = (id) => {
@@ -63,12 +45,7 @@ const Calculator = ({ onCalculate, onReset }) => {
 
   const addOneTimePayment = () => {
     const newId = Math.max(...oneTimePayments.map(p => p.id), 0) + 1;
-    setOneTimePayments(prev => [...prev, {
-      id: newId,
-      name: '',
-      age: 65,
-      amount: 0
-    }]);
+    setOneTimePayments(prev => [...prev, { id: newId, name: '', age: 65, amount: 0 }]);
   };
 
   const removeOneTimePayment = (id) => {
@@ -91,24 +68,23 @@ const Calculator = ({ onCalculate, onReset }) => {
     let currentSavings = data.lumpSumSavings;
     let currentAge = data.currentAge;
     let currentYear = data.currentYear;
-    
     const inflationMultiplier = 1 + (data.inflationRate / 100);
     const growthMultiplier = 1 + (data.investmentGrowthRate / 100);
-    
+
     // Calculate totals for summary
     let totalIncomeReceived = 0;
     let totalOneTimePayments = 0;
     let totalExpenses = 0;
     let totalGrowth = 0;
-    
+
     while (currentAge <= data.lifeExpectancy && currentSavings > 0) {
       const yearsFromStart = currentAge - data.currentAge;
       const inflationFactor = Math.pow(inflationMultiplier, yearsFromStart);
-      
+
       // ONLY apply inflation to desired monthly income
       const adjustedDesiredIncome = data.desiredMonthlyIncome * 12 * inflationFactor;
       totalExpenses += adjustedDesiredIncome;
-      
+
       // Income streams are NOT adjusted for inflation (fixed in today's value)
       let totalAnnualIncome = 0;
       streams.forEach(stream => {
@@ -118,7 +94,7 @@ const Calculator = ({ onCalculate, onReset }) => {
           totalIncomeReceived += fixedStreamIncome;
         }
       });
-      
+
       // One-time payments are NOT adjusted for inflation (fixed in today's value)
       let oneTimePaymentAmount = 0;
       payments.forEach(payment => {
@@ -128,21 +104,21 @@ const Calculator = ({ onCalculate, onReset }) => {
           totalOneTimePayments += fixedPayment;
         }
       });
-      
+
       const netAnnualExpense = adjustedDesiredIncome - totalAnnualIncome;
       const startingSavings = currentSavings;
-      
+
       // Add one-time payment first
       currentSavings += oneTimePaymentAmount;
-      
+
       // Subtract net expense
       currentSavings -= netAnnualExpense;
-      
+
       // Apply growth
       const growthAmount = currentSavings * (data.investmentGrowthRate / 100);
       currentSavings *= growthMultiplier;
       totalGrowth += growthAmount;
-      
+
       yearlyData.push({
         age: currentAge,
         year: currentYear,
@@ -155,16 +131,16 @@ const Calculator = ({ onCalculate, onReset }) => {
         endingSavings: currentSavings,
         inflationFactor: inflationFactor
       });
-      
+
       if (currentSavings <= 0) break;
-      
+
       currentAge++;
       currentYear++;
     }
-    
+
     const moneyRunsOutAge = currentSavings <= 0 ? currentAge : null;
     const moneyRunsOutYear = currentSavings <= 0 ? currentYear : null;
-    
+
     return {
       moneyRunsOutAge,
       moneyRunsOutYear,
@@ -200,96 +176,86 @@ const Calculator = ({ onCalculate, onReset }) => {
       lifeExpectancy: 85
     });
     setIncomeStreams([
-      {
-        id: 1,
-        name: 'State Pension',
-        startAge: 67,
-        monthlyAmount: 1200
-      }
+      { id: 1, name: 'Staatspensioen', startAge: 67, monthlyAmount: 1200 }
     ]);
     setOneTimePayments([
-      {
-        id: 1,
-        name: 'House Sale',
-        age: 70,
-        amount: 200000
-      }
+      { id: 1, name: 'Huis Verkoop', age: 70, amount: 200000 }
     ]);
     onReset();
   };
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Your Information</h2>
+      <h2 className="text-2xl font-bold text-gray-800 mb-6">Uw Informatie</h2>
       
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              What is your current age?
+              Wat is uw huidige leeftijd?
             </label>
             <input
               type="number"
               value={formData.currentAge}
               onChange={(e) => handleInputChange('currentAge', parseInt(e.target.value))}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="e.g., 52"
+              placeholder="bijv. 52"
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              What is the current year?
+              Wat is het huidige jaar?
             </label>
             <input
               type="number"
               value={formData.currentYear}
               onChange={(e) => handleInputChange('currentYear', parseInt(e.target.value))}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="e.g., 2025"
+              placeholder="bijv. 2025"
             />
           </div>
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            What is your total current lump sum savings/investments?
+            Wat is uw totale huidige spaargeld/investeringen?
           </label>
           <div className="relative">
-            <span className="absolute left-3 top-2 text-gray-500">$</span>
+            <span className="absolute left-3 top-2 text-gray-500">€</span>
             <input
               type="number"
               value={formData.lumpSumSavings}
               onChange={(e) => handleInputChange('lumpSumSavings', parseFloat(e.target.value))}
               className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="e.g., 500,000"
+              placeholder="bijv. 500.000"
             />
           </div>
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            How much money do you need per month in retirement (in today's value)?
+            Hoeveel geld heeft u per maand nodig in uw pensioen (in huidige waarde)?
           </label>
           <div className="relative">
-            <span className="absolute left-3 top-2 text-gray-500">$</span>
+            <span className="absolute left-3 top-2 text-gray-500">€</span>
             <input
               type="number"
               value={formData.desiredMonthlyIncome}
               onChange={(e) => handleInputChange('desiredMonthlyIncome', parseFloat(e.target.value))}
               className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="e.g., 3,500"
+              placeholder="bijv. 3.500"
             />
           </div>
           <p className="text-xs text-gray-500 mt-1">
-            💡 This amount will be adjusted for inflation over time
+            💡 Dit bedrag wordt aangepast voor inflatie over de tijd
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              What annual inflation rate should we assume?
+              Welke jaarlijkse inflatie moeten we aannemen?
             </label>
             <div className="relative">
               <input
@@ -298,18 +264,18 @@ const Calculator = ({ onCalculate, onReset }) => {
                 value={formData.inflationRate}
                 onChange={(e) => handleInputChange('inflationRate', parseFloat(e.target.value))}
                 className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="e.g., 2.0"
+                placeholder="bijv. 2.0"
               />
               <span className="absolute right-3 top-2 text-gray-500">%</span>
             </div>
             <p className="text-xs text-gray-500 mt-1">
-              💡 Applied only to your monthly expenses
+              💡 Alleen toegepast op uw maandelijkse uitgaven
             </p>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              What annual growth rate do you expect on your investments?
+              Welke jaarlijkse groei verwacht u op uw investeringen?
             </label>
             <div className="relative">
               <input
@@ -318,7 +284,7 @@ const Calculator = ({ onCalculate, onReset }) => {
                 value={formData.investmentGrowthRate}
                 onChange={(e) => handleInputChange('investmentGrowthRate', parseFloat(e.target.value))}
                 className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="e.g., 5.0"
+                placeholder="bijv. 5.0"
               />
               <span className="absolute right-3 top-2 text-gray-500">%</span>
             </div>
@@ -327,14 +293,14 @@ const Calculator = ({ onCalculate, onReset }) => {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            What age do you estimate your life expectancy to be?
+            Op welke leeftijd schat u uw levensverwachting?
           </label>
           <input
             type="number"
             value={formData.lifeExpectancy}
             onChange={(e) => handleInputChange('lifeExpectancy', parseInt(e.target.value))}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="e.g., 85"
+            placeholder="bijv. 85"
           />
         </div>
 
@@ -342,10 +308,10 @@ const Calculator = ({ onCalculate, onReset }) => {
           <div className="flex justify-between items-center mb-4">
             <div>
               <h3 className="text-lg font-semibold text-gray-800">
-                Add Future Income Sources (Pensions, etc.)
+                Voeg Toekomstige Inkomstenbronnen toe (Pensioenen, etc.)
               </h3>
               <p className="text-sm text-gray-600">
-                💡 These amounts are fixed in today's purchasing power (no inflation adjustment)
+                💡 Deze bedragen zijn vastgesteld in de huidige koopkracht (geen inflatie-aanpassing)
               </p>
             </div>
             <motion.button
@@ -355,7 +321,7 @@ const Calculator = ({ onCalculate, onReset }) => {
               className="flex items-center gap-2 px-3 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
             >
               <SafeIcon icon={FiPlus} className="w-4 h-4" />
-              Add Income
+              Inkomen Toevoegen
             </motion.button>
           </div>
 
@@ -373,7 +339,7 @@ const Calculator = ({ onCalculate, onReset }) => {
                     value={stream.name}
                     onChange={(e) => updateIncomeStream(stream.id, 'name', e.target.value)}
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="e.g., State Pension"
+                    placeholder="bijv. Staatspensioen"
                   />
                   <motion.button
                     whileHover={{ scale: 1.1 }}
@@ -384,33 +350,31 @@ const Calculator = ({ onCalculate, onReset }) => {
                     <SafeIcon icon={FiTrash2} className="w-4 h-4" />
                   </motion.button>
                 </div>
-                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      At what age does this income start?
+                      Op welke leeftijd begint dit inkomen?
                     </label>
                     <input
                       type="number"
                       value={stream.startAge}
                       onChange={(e) => updateIncomeStream(stream.id, 'startAge', parseInt(e.target.value))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="e.g., 67"
+                      placeholder="bijv. 67"
                     />
                   </div>
-                  
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Monthly amount (fixed in today's value)
+                      Maandelijks bedrag (vast in huidige waarde)
                     </label>
                     <div className="relative">
-                      <span className="absolute left-3 top-2 text-gray-500">$</span>
+                      <span className="absolute left-3 top-2 text-gray-500">€</span>
                       <input
                         type="number"
                         value={stream.monthlyAmount}
                         onChange={(e) => updateIncomeStream(stream.id, 'monthlyAmount', parseFloat(e.target.value))}
                         className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="e.g., 1,200"
+                        placeholder="bijv. 1.200"
                       />
                     </div>
                   </div>
@@ -424,10 +388,10 @@ const Calculator = ({ onCalculate, onReset }) => {
           <div className="flex justify-between items-center mb-4">
             <div>
               <h3 className="text-lg font-semibold text-gray-800">
-                Add One-Time Payments (House Sale, Inheritance, etc.)
+                Voeg Eenmalige Betalingen toe (Huis Verkoop, Erfenis, etc.)
               </h3>
               <p className="text-sm text-gray-600">
-                💡 These amounts are fixed in today's purchasing power (no inflation adjustment)
+                💡 Deze bedragen zijn vastgesteld in de huidige koopkracht (geen inflatie-aanpassing)
               </p>
             </div>
             <motion.button
@@ -437,7 +401,7 @@ const Calculator = ({ onCalculate, onReset }) => {
               className="flex items-center gap-2 px-3 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-colors"
             >
               <SafeIcon icon={FiDollarSign} className="w-4 h-4" />
-              Add Payment
+              Betaling Toevoegen
             </motion.button>
           </div>
 
@@ -455,7 +419,7 @@ const Calculator = ({ onCalculate, onReset }) => {
                     value={payment.name}
                     onChange={(e) => updateOneTimePayment(payment.id, 'name', e.target.value)}
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    placeholder="e.g., House Sale"
+                    placeholder="bijv. Huis Verkoop"
                   />
                   <motion.button
                     whileHover={{ scale: 1.1 }}
@@ -466,33 +430,31 @@ const Calculator = ({ onCalculate, onReset }) => {
                     <SafeIcon icon={FiTrash2} className="w-4 h-4" />
                   </motion.button>
                 </div>
-                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      At what age will you receive this payment?
+                      Op welke leeftijd ontvangt u deze betaling?
                     </label>
                     <input
                       type="number"
                       value={payment.age}
                       onChange={(e) => updateOneTimePayment(payment.id, 'age', parseInt(e.target.value))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      placeholder="e.g., 70"
+                      placeholder="bijv. 70"
                     />
                   </div>
-                  
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Payment amount (fixed in today's value)
+                      Betalingsbedrag (vast in huidige waarde)
                     </label>
                     <div className="relative">
-                      <span className="absolute left-3 top-2 text-gray-500">$</span>
+                      <span className="absolute left-3 top-2 text-gray-500">€</span>
                       <input
                         type="number"
                         value={payment.amount}
                         onChange={(e) => updateOneTimePayment(payment.id, 'amount', parseFloat(e.target.value))}
                         className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                        placeholder="e.g., 200,000"
+                        placeholder="bijv. 200.000"
                       />
                     </div>
                   </div>
@@ -510,9 +472,9 @@ const Calculator = ({ onCalculate, onReset }) => {
             className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
           >
             <SafeIcon icon={FiCalculator} className="w-5 h-5" />
-            Calculate
+            Berekenen
           </motion.button>
-          
+
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -520,7 +482,7 @@ const Calculator = ({ onCalculate, onReset }) => {
             className="flex items-center justify-center gap-2 px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-medium"
           >
             <SafeIcon icon={FiRefreshCw} className="w-5 h-5" />
-            Reset
+            Resetten
           </motion.button>
         </div>
       </div>

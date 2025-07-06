@@ -25,10 +25,10 @@ function App() {
           className="text-center mb-8"
         >
           <h1 className="text-4xl font-bold text-gray-800 mb-2">
-            My Retirement Runway Calculator
+            Mijn Pensioen Runway Calculator
           </h1>
           <p className="text-lg text-gray-600">
-            Discover how long your savings can sustain your retirement dreams
+            Ontdek hoe lang uw spaargeld uw pensioendromen kan ondersteunen
           </p>
         </motion.div>
 
@@ -49,6 +49,23 @@ function App() {
             <Results results={results} />
           </motion.div>
         </div>
+
+        {/* Copyright Footer */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.8 }}
+          className="mt-12 text-center"
+        >
+          <div className="bg-white rounded-lg shadow-md p-4 mx-auto max-w-md">
+            <p className="text-sm text-gray-600">
+              © {new Date().getFullYear()} <span className="font-semibold text-gray-800">Robin Ramp</span>
+            </p>
+            <p className="text-xs text-gray-500 mt-1">
+              Alle rechten voorbehouden
+            </p>
+          </div>
+        </motion.div>
       </div>
     </div>
   );

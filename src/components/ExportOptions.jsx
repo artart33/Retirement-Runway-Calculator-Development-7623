@@ -9,9 +9,9 @@ const ExportOptions = ({ results }) => {
   const [isExporting, setIsExporting] = useState(false);
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('nl-NL', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'EUR',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(amount);
@@ -21,15 +21,15 @@ const ExportOptions = ({ results }) => {
     if (!results || !results.yearlyData) return;
 
     const csvHeaders = [
-      'Age',
-      'Year',
-      'Starting Balance',
-      'Annual Income',
-      'One-Time Payment',
-      'Desired Expense',
-      'Net Expense',
-      'Growth',
-      'Ending Balance'
+      'Leeftijd',
+      'Jaar',
+      'Begin Saldo',
+      'Jaarlijks Inkomen',
+      'Eenmalige Betaling',
+      'Gewenste Uitgave',
+      'Netto Uitgave',
+      'Groei',
+      'Eind Saldo'
     ];
 
     const csvData = results.yearlyData.map(row => [
@@ -53,7 +53,7 @@ const ExportOptions = ({ results }) => {
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', 'retirement-analysis.csv');
+    link.setAttribute('download', 'pensioen-analyse.csv');
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -65,7 +65,7 @@ const ExportOptions = ({ results }) => {
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Retirement Analysis Report</title>
+        <title>Pensioen Analyse Rapport</title>
         <style>
           @media print {
             body { margin: 0; }
@@ -73,6 +73,7 @@ const ExportOptions = ({ results }) => {
           }
           body { font-family: Arial, sans-serif; margin: 20px; color: #333; line-height: 1.4; }
           .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+          .copyright { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ccc; color: #666; font-size: 12px; }
           .section { margin-bottom: 30px; page-break-inside: avoid; }
           .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
           .summary-card { border: 1px solid #ddd; padding: 15px; border-radius: 8px; background: #f9f9f9; }
@@ -97,66 +98,66 @@ const ExportOptions = ({ results }) => {
       </head>
       <body>
         <div class="header">
-          <h1>Retirement Analysis Report</h1>
-          <p>Generated on ${new Date().toLocaleDateString()}</p>
+          <h1>Pensioen Analyse Rapport</h1>
+          <p>Gegenereerd op ${new Date().toLocaleDateString('nl-NL')}</p>
         </div>
 
         <div class="section">
-          <h2>Executive Summary</h2>
+          <h2>Samenvatting</h2>
           <div class="summary-grid">
             <div class="summary-card">
-              <h4>Initial Savings</h4>
+              <h4>Initiële Spaargeld</h4>
               <div class="value">${formatCurrency(results.summary.initialSavings)}</div>
             </div>
             <div class="summary-card">
-              <h4>Total Income</h4>
+              <h4>Totaal Inkomen</h4>
               <div class="value">${formatCurrency(results.summary.totalIncomeReceived)}</div>
             </div>
             <div class="summary-card">
-              <h4>Total Expenses</h4>
+              <h4>Totale Uitgaven</h4>
               <div class="value">${formatCurrency(results.summary.totalExpenses)}</div>
             </div>
             <div class="summary-card">
-              <h4>Final Balance</h4>
+              <h4>Eindsaldo</h4>
               <div class="value ${results.summary.finalBalance > 0 ? 'success' : 'warning'}">${formatCurrency(results.summary.finalBalance)}</div>
             </div>
           </div>
           
           <div class="key-finding ${results.moneyRunsOutAge && results.moneyRunsOutAge <= results.lifeExpectancy ? 'warning' : 'success'}">
-            <strong>Key Finding:</strong> 
+            <strong>Belangrijkste Bevinding:</strong> 
             ${results.moneyRunsOutAge 
-              ? `Your funds are projected to last until age ${results.moneyRunsOutAge}.`
-              : `Your funds are projected to last throughout your entire retirement.`
+              ? `Uw fondsen zullen naar verwachting meegaan tot leeftijd ${results.moneyRunsOutAge}.`
+              : `Uw fondsen zullen naar verwachting uw hele pensioen meegaan.`
             }
           </div>
         </div>
 
         <div class="section">
-          <h2>Assumptions</h2>
+          <h2>Aannames</h2>
           <div class="assumptions">
             <div class="assumptions-grid">
               <div class="assumption-item">
-                <div class="assumption-label">Current Age:</div>
-                <div class="assumption-value">${results.formData.currentAge} years</div>
+                <div class="assumption-label">Huidige Leeftijd:</div>
+                <div class="assumption-value">${results.formData.currentAge} jaar</div>
               </div>
               <div class="assumption-item">
-                <div class="assumption-label">Life Expectancy:</div>
-                <div class="assumption-value">${results.formData.lifeExpectancy} years</div>
+                <div class="assumption-label">Levensverwachting:</div>
+                <div class="assumption-value">${results.formData.lifeExpectancy} jaar</div>
               </div>
               <div class="assumption-item">
-                <div class="assumption-label">Monthly Income Needed:</div>
+                <div class="assumption-label">Maandelijks Inkomen Nodig:</div>
                 <div class="assumption-value">${formatCurrency(results.formData.desiredMonthlyIncome)}</div>
               </div>
               <div class="assumption-item">
-                <div class="assumption-label">Inflation Rate:</div>
+                <div class="assumption-label">Inflatie Percentage:</div>
                 <div class="assumption-value">${results.formData.inflationRate}%</div>
               </div>
               <div class="assumption-item">
-                <div class="assumption-label">Investment Growth:</div>
+                <div class="assumption-label">Investering Groei:</div>
                 <div class="assumption-value">${results.formData.investmentGrowthRate}%</div>
               </div>
               <div class="assumption-item">
-                <div class="assumption-label">Initial Savings:</div>
+                <div class="assumption-label">Initiële Spaargeld:</div>
                 <div class="assumption-value">${formatCurrency(results.formData.lumpSumSavings)}</div>
               </div>
             </div>
@@ -165,14 +166,14 @@ const ExportOptions = ({ results }) => {
 
         ${results.incomeStreams.length > 0 ? `
         <div class="section">
-          <h2>Income Sources</h2>
+          <h2>Inkomstenbronnen</h2>
           <table>
             <thead>
               <tr>
-                <th style="text-align: left;">Source</th>
-                <th>Start Age</th>
-                <th>Monthly Amount</th>
-                <th>Annual Amount</th>
+                <th style="text-align: left;">Bron</th>
+                <th>Start Leeftijd</th>
+                <th>Maandelijks Bedrag</th>
+                <th>Jaarlijks Bedrag</th>
               </tr>
             </thead>
             <tbody>
@@ -191,13 +192,13 @@ const ExportOptions = ({ results }) => {
 
         ${results.oneTimePayments.length > 0 ? `
         <div class="section">
-          <h2>One-Time Payments</h2>
+          <h2>Eenmalige Betalingen</h2>
           <table>
             <thead>
               <tr>
-                <th style="text-align: left;">Payment</th>
-                <th>Age</th>
-                <th>Amount</th>
+                <th style="text-align: left;">Betaling</th>
+                <th>Leeftijd</th>
+                <th>Bedrag</th>
               </tr>
             </thead>
             <tbody>
@@ -214,19 +215,19 @@ const ExportOptions = ({ results }) => {
         ` : ''}
 
         <div class="section">
-          <h2>Year-by-Year Projections</h2>
+          <h2>Jaar-voor-Jaar Projecties</h2>
           <table>
             <thead>
               <tr>
-                <th>Age</th>
-                <th>Year</th>
-                <th>Starting Balance</th>
-                <th>Annual Income</th>
-                <th>One-Time Payment</th>
-                <th>Annual Expense</th>
-                <th>Net Expense</th>
-                <th>Growth</th>
-                <th>Ending Balance</th>
+                <th>Leeftijd</th>
+                <th>Jaar</th>
+                <th>Begin Saldo</th>
+                <th>Jaarlijks Inkomen</th>
+                <th>Eenmalige Betaling</th>
+                <th>Jaarlijkse Uitgave</th>
+                <th>Netto Uitgave</th>
+                <th>Groei</th>
+                <th>Eind Saldo</th>
               </tr>
             </thead>
             <tbody>
@@ -248,14 +249,18 @@ const ExportOptions = ({ results }) => {
         </div>
 
         <div class="section">
-          <h2>Important Notes</h2>
+          <h2>Belangrijke Opmerkingen</h2>
           <ul>
-            <li>Inflation is applied only to your monthly expenses, not to income sources or one-time payments</li>
-            <li>Income sources and one-time payments are fixed in today's purchasing power</li>
-            <li>This analysis assumes a consistent investment growth rate</li>
-            <li>Actual results may vary based on market conditions and personal circumstances</li>
-            <li>Consider consulting with a financial advisor for personalized advice</li>
+            <li>Inflatie wordt alleen toegepast op uw maandelijkse uitgaven, niet op inkomstenbronnen of eenmalige betalingen</li>
+            <li>Inkomstenbronnen en eenmalige betalingen zijn vast in de huidige koopkracht</li>
+            <li>Deze analyse gaat uit van een consistente investeringsgroei</li>
+            <li>Werkelijke resultaten kunnen variëren op basis van marktomstandigheden en persoonlijke omstandigheden</li>
+            <li>Overweeg om een financieel adviseur te raadplegen voor gepersonaliseerd advies</li>
           </ul>
+        </div>
+
+        <div class="copyright">
+          <p>© ${new Date().getFullYear()} Robin Ramp - Alle rechten voorbehouden</p>
         </div>
       </body>
       </html>
@@ -270,7 +275,7 @@ const ExportOptions = ({ results }) => {
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', 'retirement-analysis-report.html');
+    link.setAttribute('download', 'pensioen-analyse-rapport.html');
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -324,16 +329,17 @@ const ExportOptions = ({ results }) => {
   const shareResults = async () => {
     if (!results) return;
 
-    const shareText = `My Retirement Analysis Results:
-• Money lasts until age: ${results.moneyRunsOutAge || results.lifeExpectancy}
-• Initial savings: ${formatCurrency(results.summary.initialSavings)}
-• Final balance: ${formatCurrency(results.summary.finalBalance)}
-• Generated with Retirement Runway Calculator`;
+    const shareText = `Mijn Pensioen Analyse Resultaten:
+• Geld houdt tot leeftijd: ${results.moneyRunsOutAge || results.lifeExpectancy}
+• Initiële spaargeld: ${formatCurrency(results.summary.initialSavings)}
+• Eindsaldo: ${formatCurrency(results.summary.finalBalance)}
+• Gegenereerd met Pensioen Runway Calculator
+• © Robin Ramp`;
 
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Retirement Analysis Results',
+          title: 'Pensioen Analyse Resultaten',
           text: shareText,
           url: window.location.href
         });
@@ -348,9 +354,9 @@ const ExportOptions = ({ results }) => {
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text).then(() => {
-      alert('Results copied to clipboard!');
+      alert('Resultaten gekopieerd naar klembord!');
     }).catch(() => {
-      alert('Failed to copy to clipboard');
+      alert('Kopiëren naar klembord mislukt');
     });
   };
 
@@ -360,7 +366,7 @@ const ExportOptions = ({ results }) => {
       await exportFunction();
     } catch (error) {
       console.error('Export error:', error);
-      alert('Export failed. Please try again.');
+      alert('Export mislukt. Probeer opnieuw.');
     } finally {
       setIsExporting(false);
     }
@@ -376,7 +382,7 @@ const ExportOptions = ({ results }) => {
     >
       <div className="flex items-center gap-2 mb-4">
         <SafeIcon icon={FiDownload} className="w-6 h-6 text-blue-600" />
-        <h3 className="text-xl font-bold text-gray-800">Export & Share Your Results</h3>
+        <h3 className="text-xl font-bold text-gray-800">Exporteer & Deel Uw Resultaten</h3>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -389,8 +395,8 @@ const ExportOptions = ({ results }) => {
         >
           <SafeIcon icon={FiFileText} className="w-5 h-5 text-green-600" />
           <div className="text-left">
-            <div className="font-semibold text-green-800">Export to CSV</div>
-            <div className="text-sm text-green-600">Spreadsheet format</div>
+            <div className="font-semibold text-green-800">Export naar CSV</div>
+            <div className="text-sm text-green-600">Spreadsheet formaat</div>
           </div>
         </motion.button>
 
@@ -403,8 +409,8 @@ const ExportOptions = ({ results }) => {
         >
           <SafeIcon icon={FiFileText} className="w-5 h-5 text-purple-600" />
           <div className="text-left">
-            <div className="font-semibold text-purple-800">Generate Report</div>
-            <div className="text-sm text-purple-600">HTML report</div>
+            <div className="font-semibold text-purple-800">Genereer Rapport</div>
+            <div className="text-sm text-purple-600">HTML rapport</div>
           </div>
         </motion.button>
 
@@ -417,8 +423,8 @@ const ExportOptions = ({ results }) => {
         >
           <SafeIcon icon={FiFileText} className="w-5 h-5 text-red-600" />
           <div className="text-left">
-            <div className="font-semibold text-red-800">Export to PDF</div>
-            <div className="text-sm text-red-600">PDF format</div>
+            <div className="font-semibold text-red-800">Export naar PDF</div>
+            <div className="text-sm text-red-600">PDF formaat</div>
           </div>
         </motion.button>
 
@@ -431,8 +437,8 @@ const ExportOptions = ({ results }) => {
         >
           <SafeIcon icon={FiPrinter} className="w-5 h-5 text-gray-600" />
           <div className="text-left">
-            <div className="font-semibold text-gray-800">Print Results</div>
-            <div className="text-sm text-gray-600">Print report</div>
+            <div className="font-semibold text-gray-800">Print Resultaten</div>
+            <div className="text-sm text-gray-600">Print rapport</div>
           </div>
         </motion.button>
 
@@ -444,15 +450,15 @@ const ExportOptions = ({ results }) => {
         >
           <SafeIcon icon={FiShare2} className="w-5 h-5 text-orange-600" />
           <div className="text-left">
-            <div className="font-semibold text-orange-800">Share Results</div>
-            <div className="text-sm text-orange-600">Copy summary to clipboard</div>
+            <div className="font-semibold text-orange-800">Deel Resultaten</div>
+            <div className="text-sm text-orange-600">Kopieer samenvatting naar klembord</div>
           </div>
         </motion.button>
       </div>
 
       <div className="mt-4 p-3 bg-gray-50 rounded-lg">
         <p className="text-sm text-gray-600">
-          💡 <strong>Tip:</strong> Save your results in multiple formats for easy sharing with financial advisors or family members.
+          💡 <strong>Tip:</strong> Bewaar uw resultaten in meerdere formaten om gemakkelijk te delen met financiële adviseurs of familieleden.
         </p>
       </div>
     </motion.div>
