@@ -4,7 +4,7 @@ import SafeIcon from '../common/SafeIcon';
 import ExportOptions from './ExportOptions';
 import * as FiIcons from 'react-icons/fi';
 
-const { FiTrendingUp, FiTrendingDown, FiCheckCircle, FiAlertTriangle, FiDollarSign, FiBarChart3, FiPieChart, FiInfo } = FiIcons;
+const { FiTrendingUp, FiTrendingDown, FiCheckCircle, FiAlertTriangle, FiDollarSign, FiBarChart3, FiPieChart, FiInfo, FiUsers, FiUser } = FiIcons;
 
 const Results = ({ results }) => {
   if (!results) {
@@ -44,6 +44,25 @@ const Results = ({ results }) => {
       {/* Export Options */}
       <ExportOptions results={results} />
 
+      {/* Partner Notice */}
+      {results.hasPartner && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-purple-50 border border-purple-200 rounded-lg p-4"
+        >
+          <div className="flex items-start gap-3">
+            <SafeIcon icon={FiUsers} className="w-5 h-5 text-purple-600 mt-0.5" />
+            <div>
+              <h4 className="font-semibold text-purple-800 mb-1">Partner Berekening</h4>
+              <p className="text-sm text-purple-700">
+                <strong>Deze analyse combineert beide partners.</strong> Spaargelden worden samengevoegd, uitgaven gecombineerd, en de berekening loopt tot de langste levensverwachting. Inkomsten stoppen wanneer de respectievelijke eigenaar overlijdt.
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* Inflation Notice */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -66,7 +85,16 @@ const Results = ({ results }) => {
         animate={{ opacity: 1, y: 0 }}
         className="bg-white rounded-xl shadow-lg p-6"
       >
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">Uw Pensioen Runway Analyse</h2>
+        <div className="flex items-center gap-2 mb-6">
+          {results.hasPartner ? (
+            <SafeIcon icon={FiUsers} className="w-6 h-6 text-purple-600" />
+          ) : (
+            <SafeIcon icon={FiUser} className="w-6 h-6 text-blue-600" />
+          )}
+          <h2 className="text-2xl font-bold text-gray-800">
+            {results.hasPartner ? 'Uw Gecombineerde Pensioen Runway Analyse' : 'Uw Pensioen Runway Analyse'}
+          </h2>
+        </div>
         
         <div className="space-y-6">
           <div className={`p-4 rounded-lg border-2 ${isSuccessful ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
@@ -83,31 +111,32 @@ const Results = ({ results }) => {
             {results.moneyRunsOutAge ? (
               <div className="space-y-2">
                 <p className="text-gray-700">
-                  Gebaseerd op uw invoer, zal uw geld naar verwachting meegaan tot u{' '}
-                  <span className="font-bold">{results.moneyRunsOutAge} jaar oud</span> bent.
+                  Gebaseerd op uw invoer, zal {results.hasPartner ? 'uw gecombineerde' : 'uw'} geld naar verwachting meegaan tot{' '}
+                  <span className="font-bold">leeftijd {results.moneyRunsOutAge}</span>.
                 </p>
                 <p className="text-gray-700">
-                  Dit betekent dat uw fondsen opraken in het jaar{' '}
+                  Dit betekent dat {results.hasPartner ? 'uw gezamenlijke' : 'uw'} fondsen opraken in het jaar{' '}
                   <span className="font-bold">{results.moneyRunsOutYear}</span>.
                 </p>
                 {!isSuccessful && (
                   <p className="text-red-700 font-medium mt-3">
-                    Dit is {yearsShort} jaar voor uw geschatte levensverwachting. U moet mogelijk uw uitgaven aanpassen, meer sparen, of aanvullende inkomstenbronnen verkennen.
+                    Dit is {yearsShort} jaar voor {results.hasPartner ? 'de langste' : 'uw'} geschatte levensverwachting. 
+                    {results.hasPartner ? ' Jullie moeten mogelijk' : ' U moet mogelijk'} uitgaven aanpassen, meer sparen, of aanvullende inkomstenbronnen verkennen.
                   </p>
                 )}
                 {isSuccessful && (
                   <p className="text-green-700 font-medium mt-3">
-                    Uw fondsen zullen naar verwachting langer meegaan dan uw geschatte levensverwachting, wat een comfortabele buffer biedt.
+                    {results.hasPartner ? 'Uw gezamenlijke' : 'Uw'} fondsen zullen naar verwachting langer meegaan dan {results.hasPartner ? 'de langste' : 'uw'} geschatte levensverwachting, wat een comfortabele buffer biedt.
                   </p>
                 )}
               </div>
             ) : (
               <div className="space-y-2">
                 <p className="text-green-700 font-medium">
-                  Uitstekend! Uw fondsen zullen naar verwachting uw hele pensioen meegaan.
+                  Uitstekend! {results.hasPartner ? 'Uw gezamenlijke' : 'Uw'} fondsen zullen naar verwachting {results.hasPartner ? 'het hele pensioen van beide partners' : 'uw hele pensioen'} meegaan.
                 </p>
                 <p className="text-gray-700">
-                  U zou ongeveer {formatCurrency(results.finalSavings)} overhouden op {results.lifeExpectancy}-jarige leeftijd.
+                  {results.hasPartner ? 'Jullie zouden' : 'U zou'} ongeveer {formatCurrency(results.finalSavings)} overhouden op {results.lifeExpectancy}-jarige leeftijd.
                 </p>
               </div>
             )}
@@ -152,14 +181,18 @@ const Results = ({ results }) => {
       >
         <div className="flex items-center gap-2 mb-6">
           <SafeIcon icon={FiPieChart} className="w-6 h-6 text-indigo-600" />
-          <h3 className="text-xl font-bold text-gray-800">Complete Financiële Samenvatting</h3>
+          <h3 className="text-xl font-bold text-gray-800">
+            {results.hasPartner ? 'Gecombineerde Financiële Samenvatting' : 'Complete Financiële Samenvatting'}
+          </h3>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
           <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
             <div className="flex items-center gap-2 mb-2">
               <SafeIcon icon={FiDollarSign} className="w-5 h-5 text-blue-600" />
-              <span className="text-sm font-medium text-blue-800">Initiële Spaargeld</span>
+              <span className="text-sm font-medium text-blue-800">
+                {results.hasPartner ? 'Gecombineerd Initieel Spaargeld' : 'Initiële Spaargeld'}
+              </span>
             </div>
             <p className="text-2xl font-bold text-blue-900">
               {formatCurrency(results.summary.initialSavings)}
@@ -198,7 +231,9 @@ const Results = ({ results }) => {
           <div className="bg-red-50 p-4 rounded-lg border border-red-200">
             <div className="flex items-center gap-2 mb-2">
               <SafeIcon icon={FiTrendingDown} className="w-5 h-5 text-red-600" />
-              <span className="text-sm font-medium text-red-800">Totale Uitgaven</span>
+              <span className="text-sm font-medium text-red-800">
+                {results.hasPartner ? 'Gecombineerde Uitgaven' : 'Totale Uitgaven'}
+              </span>
             </div>
             <p className="text-2xl font-bold text-red-900">
               {formatCurrency(results.summary.totalExpenses)}
@@ -280,6 +315,7 @@ const Results = ({ results }) => {
               <thead>
                 <tr className="border-b-2 border-gray-200">
                   <th className="text-left p-3 font-semibold">Leeftijd</th>
+                  {results.hasPartner && <th className="text-left p-3 font-semibold">Partner</th>}
                   <th className="text-left p-3 font-semibold">Jaar</th>
                   <th className="text-right p-3 font-semibold">Begin Saldo</th>
                   <th className="text-right p-3 font-semibold">Jaarlijks Inkomen<br/><span className="text-xs font-normal text-gray-500">(Vast)</span></th>
@@ -296,7 +332,16 @@ const Results = ({ results }) => {
                     key={index} 
                     className={`border-b hover:bg-gray-50 ${row.endingSavings <= 0 ? 'bg-red-50' : ''}`}
                   >
-                    <td className="p-3 font-medium">{row.age}</td>
+                    <td className="p-3 font-medium">
+                      {row.age}
+                      {!row.mainPersonAlive && <span className="text-red-500 text-xs ml-1">†</span>}
+                    </td>
+                    {results.hasPartner && (
+                      <td className="p-3 font-medium">
+                        {row.partnerAge}
+                        {!row.partnerAlive && <span className="text-red-500 text-xs ml-1">†</span>}
+                      </td>
+                    )}
                     <td className="p-3">{row.year}</td>
                     <td className="p-3 text-right">{formatCurrency(row.startingSavings)}</td>
                     <td className="p-3 text-right text-green-600 font-medium">
@@ -353,6 +398,12 @@ const Results = ({ results }) => {
                 <div className="w-3 h-3 bg-blue-500 rounded"></div>
                 <span>Groei: Investeringsrendementen op resterend saldo</span>
               </div>
+              {results.hasPartner && (
+                <div className="flex items-center gap-2">
+                  <span className="text-red-500">†</span>
+                  <span>Geeft aan wanneer een persoon niet meer leeft</span>
+                </div>
+              )}
             </div>
           </div>
         </motion.div>

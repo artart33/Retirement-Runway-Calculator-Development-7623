@@ -22,6 +22,7 @@ const ExportOptions = ({ results }) => {
 
     const csvHeaders = [
       'Leeftijd',
+      ...(results.hasPartner ? ['Partner Leeftijd'] : []),
       'Jaar',
       'Begin Saldo',
       'Jaarlijks Inkomen',
@@ -29,11 +30,13 @@ const ExportOptions = ({ results }) => {
       'Gewenste Uitgave',
       'Netto Uitgave',
       'Groei',
-      'Eind Saldo'
+      'Eind Saldo',
+      ...(results.hasPartner ? ['Hoofdpersoon Leeft', 'Partner Leeft'] : [])
     ];
 
     const csvData = results.yearlyData.map(row => [
       row.age,
+      ...(results.hasPartner ? [row.partnerAge] : []),
       row.year,
       row.startingSavings.toFixed(2),
       row.totalIncome.toFixed(2),
@@ -41,7 +44,8 @@ const ExportOptions = ({ results }) => {
       row.desiredIncome.toFixed(2),
       row.netExpense.toFixed(2),
       row.growthAmount.toFixed(2),
-      Math.max(0, row.endingSavings).toFixed(2)
+      Math.max(0, row.endingSavings).toFixed(2),
+      ...(results.hasPartner ? [row.mainPersonAlive ? 'Ja' : 'Nee', row.partnerAlive ? 'Ja' : 'Nee'] : [])
     ]);
 
     const csvContent = [
@@ -53,7 +57,7 @@ const ExportOptions = ({ results }) => {
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', 'pensioen-analyse.csv');
+    link.setAttribute('download', `pensioen-analyse${results.hasPartner ? '-partners' : ''}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -65,7 +69,7 @@ const ExportOptions = ({ results }) => {
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Pensioen Analyse Rapport</title>
+        <title>${results.hasPartner ? 'Gecombineerde Pensioen Analyse Rapport' : 'Pensioen Analyse Rapport'}</title>
         <style>
           @media print {
             body { margin: 0; }
@@ -94,19 +98,28 @@ const ExportOptions = ({ results }) => {
           .key-finding { padding: 15px; border-radius: 8px; margin: 20px 0; font-weight: bold; }
           .key-finding.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
           .key-finding.warning { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+          .partner-info { background: #f3e8ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+          .deceased { color: #dc3545; }
         </style>
       </head>
       <body>
         <div class="header">
-          <h1>Pensioen Analyse Rapport</h1>
+          <h1>${results.hasPartner ? 'Gecombineerde Pensioen Analyse Rapport' : 'Pensioen Analyse Rapport'}</h1>
           <p>Gegenereerd op ${new Date().toLocaleDateString('nl-NL')}</p>
         </div>
+
+        ${results.hasPartner ? `
+        <div class="partner-info">
+          <h3>Partner Berekening</h3>
+          <p><strong>Deze analyse combineert beide partners.</strong> Spaargelden worden samengevoegd, uitgaven gecombineerd, en de berekening loopt tot de langste levensverwachting. Inkomsten stoppen wanneer de respectievelijke eigenaar overlijdt.</p>
+        </div>
+        ` : ''}
 
         <div class="section">
           <h2>Samenvatting</h2>
           <div class="summary-grid">
             <div class="summary-card">
-              <h4>Initiële Spaargeld</h4>
+              <h4>${results.hasPartner ? 'Gecombineerd Initieel Spaargeld' : 'Initiële Spaargeld'}</h4>
               <div class="value">${formatCurrency(results.summary.initialSavings)}</div>
             </div>
             <div class="summary-card">
@@ -114,7 +127,7 @@ const ExportOptions = ({ results }) => {
               <div class="value">${formatCurrency(results.summary.totalIncomeReceived)}</div>
             </div>
             <div class="summary-card">
-              <h4>Totale Uitgaven</h4>
+              <h4>${results.hasPartner ? 'Gecombineerde Uitgaven' : 'Totale Uitgaven'}</h4>
               <div class="value">${formatCurrency(results.summary.totalExpenses)}</div>
             </div>
             <div class="summary-card">
@@ -126,8 +139,8 @@ const ExportOptions = ({ results }) => {
           <div class="key-finding ${results.moneyRunsOutAge && results.moneyRunsOutAge <= results.lifeExpectancy ? 'warning' : 'success'}">
             <strong>Belangrijkste Bevinding:</strong> 
             ${results.moneyRunsOutAge 
-              ? `Uw fondsen zullen naar verwachting meegaan tot leeftijd ${results.moneyRunsOutAge}.`
-              : `Uw fondsen zullen naar verwachting uw hele pensioen meegaan.`
+              ? `${results.hasPartner ? 'Uw gezamenlijke' : 'Uw'} fondsen zullen naar verwachting meegaan tot leeftijd ${results.moneyRunsOutAge}.`
+              : `${results.hasPartner ? 'Uw gezamenlijke' : 'Uw'} fondsen zullen naar verwachting ${results.hasPartner ? 'het hele pensioen van beide partners' : 'uw hele pensioen'} meegaan.`
             }
           </div>
         </div>
@@ -137,17 +150,35 @@ const ExportOptions = ({ results }) => {
           <div class="assumptions">
             <div class="assumptions-grid">
               <div class="assumption-item">
-                <div class="assumption-label">Huidige Leeftijd:</div>
+                <div class="assumption-label">Hoofdpersoon Leeftijd:</div>
                 <div class="assumption-value">${results.formData.currentAge} jaar</div>
               </div>
+              ${results.hasPartner && results.formData.partnerData ? `
+              <div class="assumption-item">
+                <div class="assumption-label">Partner Leeftijd:</div>
+                <div class="assumption-value">${results.formData.partnerData.currentAge} jaar</div>
+              </div>
+              ` : ''}
               <div class="assumption-item">
                 <div class="assumption-label">Levensverwachting:</div>
                 <div class="assumption-value">${results.formData.lifeExpectancy} jaar</div>
               </div>
+              ${results.hasPartner && results.formData.partnerData ? `
+              <div class="assumption-item">
+                <div class="assumption-label">Partner Levensverwachting:</div>
+                <div class="assumption-value">${results.formData.partnerData.lifeExpectancy} jaar</div>
+              </div>
+              ` : ''}
               <div class="assumption-item">
                 <div class="assumption-label">Maandelijks Inkomen Nodig:</div>
                 <div class="assumption-value">${formatCurrency(results.formData.desiredMonthlyIncome)}</div>
               </div>
+              ${results.hasPartner && results.formData.partnerData ? `
+              <div class="assumption-item">
+                <div class="assumption-label">Partner Maandelijks Inkomen:</div>
+                <div class="assumption-value">${formatCurrency(results.formData.partnerData.desiredMonthlyIncome)}</div>
+              </div>
+              ` : ''}
               <div class="assumption-item">
                 <div class="assumption-label">Inflatie Percentage:</div>
                 <div class="assumption-value">${results.formData.inflationRate}%</div>
@@ -157,8 +188,8 @@ const ExportOptions = ({ results }) => {
                 <div class="assumption-value">${results.formData.investmentGrowthRate}%</div>
               </div>
               <div class="assumption-item">
-                <div class="assumption-label">Initiële Spaargeld:</div>
-                <div class="assumption-value">${formatCurrency(results.formData.lumpSumSavings)}</div>
+                <div class="assumption-label">${results.hasPartner ? 'Gecombineerd' : ''} Initiële Spaargeld:</div>
+                <div class="assumption-value">${formatCurrency(results.formData.combinedLumpSum || results.formData.lumpSumSavings)}</div>
               </div>
             </div>
           </div>
@@ -171,6 +202,7 @@ const ExportOptions = ({ results }) => {
             <thead>
               <tr>
                 <th style="text-align: left;">Bron</th>
+                <th>Eigenaar</th>
                 <th>Start Leeftijd</th>
                 <th>Maandelijks Bedrag</th>
                 <th>Jaarlijks Bedrag</th>
@@ -180,6 +212,7 @@ const ExportOptions = ({ results }) => {
               ${results.incomeStreams.map(stream => `
                 <tr>
                   <td style="text-align: left;">${stream.name}</td>
+                  <td>${stream.owner === 'self' ? 'Hoofdpersoon' : 'Partner'}</td>
                   <td>${stream.startAge}</td>
                   <td>${formatCurrency(stream.monthlyAmount)}</td>
                   <td>${formatCurrency(stream.monthlyAmount * 12)}</td>
@@ -197,6 +230,7 @@ const ExportOptions = ({ results }) => {
             <thead>
               <tr>
                 <th style="text-align: left;">Betaling</th>
+                <th>Eigenaar</th>
                 <th>Leeftijd</th>
                 <th>Bedrag</th>
               </tr>
@@ -205,6 +239,7 @@ const ExportOptions = ({ results }) => {
               ${results.oneTimePayments.map(payment => `
                 <tr>
                   <td style="text-align: left;">${payment.name}</td>
+                  <td>${payment.owner === 'self' ? 'Hoofdpersoon' : 'Partner'}</td>
                   <td>${payment.age}</td>
                   <td>${formatCurrency(payment.amount)}</td>
                 </tr>
@@ -220,6 +255,7 @@ const ExportOptions = ({ results }) => {
             <thead>
               <tr>
                 <th>Leeftijd</th>
+                ${results.hasPartner ? '<th>Partner</th>' : ''}
                 <th>Jaar</th>
                 <th>Begin Saldo</th>
                 <th>Jaarlijks Inkomen</th>
@@ -233,7 +269,8 @@ const ExportOptions = ({ results }) => {
             <tbody>
               ${results.yearlyData.map(row => `
                 <tr ${row.endingSavings <= 0 ? 'class="highlight"' : ''}>
-                  <td>${row.age}</td>
+                  <td>${row.age}${!row.mainPersonAlive ? ' <span class="deceased">†</span>' : ''}</td>
+                  ${results.hasPartner ? `<td>${row.partnerAge}${!row.partnerAlive ? ' <span class="deceased">†</span>' : ''}</td>` : ''}
                   <td>${row.year}</td>
                   <td>${formatCurrency(row.startingSavings)}</td>
                   <td>${formatCurrency(row.totalIncome)}</td>
@@ -251,8 +288,9 @@ const ExportOptions = ({ results }) => {
         <div class="section">
           <h2>Belangrijke Opmerkingen</h2>
           <ul>
-            <li>Inflatie wordt alleen toegepast op uw maandelijkse uitgaven, niet op inkomstenbronnen of eenmalige betalingen</li>
+            <li>Inflatie wordt alleen toegepast op ${results.hasPartner ? 'uw gecombineerde' : 'uw'} maandelijkse uitgaven, niet op inkomstenbronnen of eenmalige betalingen</li>
             <li>Inkomstenbronnen en eenmalige betalingen zijn vast in de huidige koopkracht</li>
+            ${results.hasPartner ? '<li>Bij partners worden spaargelden gecombineerd, maar inkomsten stoppen wanneer de respectievelijke eigenaar overlijdt</li>' : ''}
             <li>Deze analyse gaat uit van een consistente investeringsgroei</li>
             <li>Werkelijke resultaten kunnen variëren op basis van marktomstandigheden en persoonlijke omstandigheden</li>
             <li>Overweeg om een financieel adviseur te raadplegen voor gepersonaliseerd advies</li>
@@ -275,7 +313,7 @@ const ExportOptions = ({ results }) => {
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', 'pensioen-analyse-rapport.html');
+    link.setAttribute('download', `pensioen-analyse-rapport${results.hasPartner ? '-partners' : ''}.html`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -329,9 +367,9 @@ const ExportOptions = ({ results }) => {
   const shareResults = async () => {
     if (!results) return;
 
-    const shareText = `Mijn Pensioen Analyse Resultaten:
+    const shareText = `${results.hasPartner ? 'Onze Gecombineerde' : 'Mijn'} Pensioen Analyse Resultaten:
 • Geld houdt tot leeftijd: ${results.moneyRunsOutAge || results.lifeExpectancy}
-• Initiële spaargeld: ${formatCurrency(results.summary.initialSavings)}
+• ${results.hasPartner ? 'Gecombineerd initieel' : 'Initiële'} spaargeld: ${formatCurrency(results.summary.initialSavings)}
 • Eindsaldo: ${formatCurrency(results.summary.finalBalance)}
 • Gegenereerd met Pensioen Runway Calculator
 • © Robin Ramp`;
@@ -339,7 +377,7 @@ const ExportOptions = ({ results }) => {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Pensioen Analyse Resultaten',
+          title: `${results.hasPartner ? 'Gecombineerde' : ''} Pensioen Analyse Resultaten`,
           text: shareText,
           url: window.location.href
         });
@@ -382,7 +420,9 @@ const ExportOptions = ({ results }) => {
     >
       <div className="flex items-center gap-2 mb-4">
         <SafeIcon icon={FiDownload} className="w-6 h-6 text-blue-600" />
-        <h3 className="text-xl font-bold text-gray-800">Exporteer & Deel Uw Resultaten</h3>
+        <h3 className="text-xl font-bold text-gray-800">
+          Exporteer & Deel {results.hasPartner ? 'Uw Gecombineerde' : 'Uw'} Resultaten
+        </h3>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -458,7 +498,7 @@ const ExportOptions = ({ results }) => {
 
       <div className="mt-4 p-3 bg-gray-50 rounded-lg">
         <p className="text-sm text-gray-600">
-          💡 <strong>Tip:</strong> Bewaar uw resultaten in meerdere formaten om gemakkelijk te delen met financiële adviseurs of familieleden.
+          💡 <strong>Tip:</strong> Bewaar {results.hasPartner ? 'uw gecombineerde' : 'uw'} resultaten in meerdere formaten om gemakkelijk te delen met financiële adviseurs of familieleden.
         </p>
       </div>
     </motion.div>
